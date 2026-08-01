@@ -9,4 +9,7 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
 
 jwt.secret=your_jwt_secret_key_here
-jwt.expiration = "your_jwt_expiration_here
+jwt.expiration = "your_ jwt_expiration_here
+
+ollama.base-url=http://localhost:11434
+ollama.model=llama3.2
