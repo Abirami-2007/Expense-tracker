@@ -14,6 +14,13 @@ A full-stack personal expense tracking application with a Java Spring Boot backe
 * Hibernate / Spring Data JPA
 * Oracle Database (XE)
 * Lombok
+* Ollama (local LLM) for the AI Advisor module
+
+**Frontend**
+
+* React 18 + Vite
+* React Router
+* Axios
 
 \---
 
@@ -21,8 +28,8 @@ A full-stack personal expense tracking application with a Java Spring Boot backe
 
 ```
 Expense-tracker/
-├── backend/        ← Spring Boot REST API
-└── frontend/       ← React app (coming soon)
+├── backend/        ← Spring Boot REST API (+ AI Advisor module)
+└── frontend/       ← React app
 ```
 
 \---
@@ -30,11 +37,12 @@ Expense-tracker/
 ## Backend Features
 
 * JWT-based authentication (register, login)
-* Expense CRUD — create, read, update, delete
+* Expense CRUD — create, read, update, delete — scoped to the logged-in user
 * Category management with auto-create
 * Pagination support on expense listing
 * DTO pattern — request and response models separated from entities
 * Oracle sequences for primary key generation
+* **AI Advisor module** — chat + auto-generated insights, powered by a local Ollama model, grounded in your real expense data (no data leaves your machine)
 
 
 
@@ -88,7 +96,21 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
 jwt.secret=your\_secret\_key\_minimum\_32\_characters\_long
 ```
 
-### 4\. Run the application
+### 4\. Set up the AI Advisor (Ollama — local & free)
+
+The advisor calls a locally running [Ollama](https://ollama.com) model, so nothing is sent to a third-party API and there's no API key or bill.
+
+```bash
+# 1. Install Ollama: https://ollama.com/download
+# 2. Pull a model (llama3.2 is a good default — small and fast on CPU)
+ollama pull llama3.2
+# 3. Start the Ollama server (leave this running in its own terminal)
+ollama serve
+```
+
+`ollama.base-url` and `ollama.model` in `application.properties` control which model is used — change `ollama.model` if you pull a different one (e.g. `mistral`, `llama3.1`, `phi3`).
+
+### 5\. Run the backend
 
 ```bash
 cd backend
@@ -96,6 +118,29 @@ cd backend
 ```
 
 The API starts at `http://localhost:8080`
+
+### 6\. Run the frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env   # defaults to http://localhost:8080, edit if needed
+npm run dev
+```
+
+The app starts at `http://localhost:5173`. Register an account, log in, and start tracking.
+
+\---
+
+## Running everything together
+
+You'll want three things running at once, each in its own terminal:
+
+1. `ollama serve` (AI advisor)
+2. `cd backend && ./mvnw spring-boot:run` (API, port 8080)
+3. `cd frontend && npm run dev` (UI, port 5173)
+
+If the advisor endpoints return a "could not reach Ollama" error, it just means step 1 isn't running yet — everything else in the app works fine without it.
 
 \---
 
@@ -118,6 +163,13 @@ The API starts at `http://localhost:8080`
 |GET|/api/expense/{id}|Get expense by ID|Yes|
 |PUT|/api/expense/{id}|Update expense|Yes|
 |DELETE|/api/expense/{id}|Delete expense|Yes|
+
+### AI Advisor
+
+|Method|Endpoint|Description|Auth required|
+|-|-|-|-|
+|GET|/api/advisor/insights|Auto-generated tips based on your expense data|Yes|
+|POST|/api/advisor/chat|Chat with the advisor about your spending|Yes|
 
 ### Using the JWT token
 
@@ -165,6 +217,18 @@ Authorization: Bearer <token>
 }
 ```
 
+**Chat with the Advisor**
+
+```json
+POST /api/advisor/chat
+Authorization: Bearer <token>
+
+{
+  "message": "Where is most of my money going?",
+  "history": []
+}
+```
+
 \---
 
 ## Roadmap
@@ -173,14 +237,12 @@ Authorization: Bearer <token>
 * \[ ] Global exception handler
 * \[ ] Analytics endpoints (monthly trend, top categories)
 * \[ ] CSV export
-* \[ ] React frontend
+* \[x] React frontend
+* \[x] AI Advisor module (local LLM via Ollama)
 
 \---
 
 ## Author
 
-Abirami
-
-GitHub:
-https://github.com/Abirami-2007
+**Abirami** — [github.com/](https://github.com/YOUR_USERNAME)Abirami-2007
 
