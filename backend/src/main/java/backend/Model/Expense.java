@@ -31,4 +31,8 @@ public class Expense {
     private Category category;;
 
     private LocalDate expensedate;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
